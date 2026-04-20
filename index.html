@@ -1,15 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Expense Tracker</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nhật Ký" />
+  <meta name="theme-color" content="#F2E6D6" />
+  
+  <title>Nhật Ký Chi Tiêu</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="IMG_2208.png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Expense Tracker App</h1>
-    <div id="app"></div>
-    <script src="store.js"></script>
-    <script src="script.js"></script>
+
+<div id="app">
+  <div id="header">
+    <h1>NHẬT KÝ CHI TIÊU</h1>
+  </div>
+
+  <div style="display:flex;justify-content:center;">
+    <button id="month-selector-btn" onclick="openMonthPicker()">
+      <i data-lucide="calendar" style="width:16px;height:16px;color:var(--color-primary);"></i>
+      <span id="month-display">Tháng 1 / 2025</span>
+      <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--color-muted);"></i>
+    </button>
+  </div>
+
+  <div class="glass-card animate-fadeup" id="hero-section">
+    <div class="label-top">Còn lại</div>
+    <div id="remaining-amount" onclick="openBudgetForm()" title="Nhấn để đặt ngân sách">0 ₫</div>
+    <div class="budget-sub">
+      <div class="item">
+        <div class="val" id="budget-display">0 ₫</div>
+        <div class="lbl">Ngân sách</div>
+      </div>
+      <div class="budget-divider"></div>
+      <div class="item">
+        <div class="val" id="spent-display">0 ₫</div>
+        <div class="lbl">Đã chi</div>
+      </div>
+    </div>
+    <div class="budget-progress-wrap">
+      <div id="budget-progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="glass-card animate-fadeup" id="calendar-section">
+    <div class="monthly-summary">
+      <span class="sum-label">Tổng chi tháng</span>
+      <span class="sum-value" id="monthly-total-display">0 ₫</span>
+    </div>
+    <div class="cal-header">
+      <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
+    </div>
+    <div id="calendar-grid"></div>
+  </div>
+
+  <div class="scroll-spacer"></div>
+</div>
+
+<div id="footer-nav">
+  <button class="nav-btn" onclick="changeMonth(-1)">
+    <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
+    <span>Trước</span>
+  </button>
+  <span class="month-label" id="footer-month-label"></span>
+  <button class="nav-btn" onclick="changeMonth(1)">
+    <span>Sau</span>
+    <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+  </button>
+</div>
+
+<div class="modal-overlay" id="month-picker-modal" onclick="closeModalOnBg(event,'month-picker-modal')">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Chọn Tháng</div>
+    <div class="year-nav">
+      <button class="year-nav-btn" onclick="changePickerYear(-1)">
+        <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
+      </button>
+      <span class="year-txt" id="picker-year-label">2025</span>
+      <button class="year-nav-btn" onclick="changePickerYear(1)">
+        <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+    <div class="month-grid" id="month-picker-grid"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="budget-modal" onclick="closeModalOnBg(event,'budget-modal')">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Ngân Sách Tháng</div>
+    <div style="margin-bottom:16px;">
+      <label class="form-label">Số tiền ngân sách (₫)</label>
+      <input type="number" id="budget-input" class="form-input" placeholder="VD: 5000000" inputmode="numeric" />
+    </div>
+    <button class="btn-primary" onclick="saveBudget()">Lưu Ngân Sách</button>
+    <button class="btn-secondary" onclick="closeModal('budget-modal')">Huỷ</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="day-modal" onclick="closeModalOnBg(event,'day-modal')">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="day-modal-title">Chi Tiêu Ngày</div>
+    <div id="day-expense-list"></div>
+    <div id="expense-form" style="margin-top:8px;">
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Danh mục gợi ý</label>
+        <div class="category-grid" id="category-grid"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Ghi chú (tuỳ chọn)</label>
+        <input type="text" id="exp-note" class="form-input" placeholder="VD: Cà phê sáng" />
+      </div>
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Số tiền (₫)</label>
+        <input type="number" id="exp-amount" class="form-input" placeholder="VD: 50000" inputmode="numeric" />
+      </div>
+      <input type="hidden" id="exp-edit-index" value="-1" />
+      <button class="btn-primary" onclick="saveExpense()">
+        <span id="exp-save-label">Thêm Chi Tiêu</span>
+      </button>
+      <button class="btn-secondary" onclick="cancelExpenseEdit()">Huỷ</button>
+    </div>
+  </div>
+</div>
+
+<script src="store.js"></script>
+<script src="script.js"></script>
+
 </body>
 </html>
