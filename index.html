@@ -21,9 +21,14 @@
 <body>
 
 <div id="app">
-  <div id="header">
+  <div id="header" style="position: relative; display: flex; justify-content: center; align-items: center;">
     <h1>NHẬT KÝ CHI TIÊU</h1>
+    <button onclick="openSettingsModal()" style="position: absolute; right: 16px; background: none; border: none; padding: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+      <i data-lucide="settings" style="width:20px;height:20px;color:var(--color-primary);"></i>
+    </button>
   </div>
+  
+  <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
 
   <div style="display:flex;justify-content:center;">
     <button id="month-selector-btn" onclick="openMonthPicker()">
@@ -92,6 +97,26 @@
       </button>
     </div>
     <div class="month-grid" id="month-picker-grid"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settings-modal" onclick="closeModalOnBg(event,'settings-modal')">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Cài Đặt Dữ Liệu</div>
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+      <button class="btn-primary" style="background: linear-gradient(135deg, #6B8E6B, #4A6B4A);" onclick="exportData()">
+        <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i data-lucide="download" style="width:18px;height:18px;"></i> Xuất Dữ Liệu
+        </span>
+      </button>
+      <button class="btn-primary" style="background: linear-gradient(135deg, #C0634A, #A04B35);" onclick="document.getElementById('import-file').click(); closeModal('settings-modal');">
+        <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i data-lucide="upload" style="width:18px;height:18px;"></i> Nhập Dữ Liệu
+        </span>
+      </button>
+    </div>
+    <button class="btn-secondary" onclick="closeModal('settings-modal')">Đóng</button>
   </div>
 </div>
 

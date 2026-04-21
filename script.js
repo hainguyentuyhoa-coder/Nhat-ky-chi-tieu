@@ -261,4 +261,94 @@ function deleteExpense(idx) {
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   renderAll();
+  setupBottomSheetSwipe();
 });
+
+function setupBottomSheetSwipe() {
+  const modals = document.querySelectorAll('.modal-overlay');
+  
+  modals.forEach(modal => {
+    const sheet = modal.querySelector('.bottom-sheet');
+    if (!sheet) return;
+
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    
+    sheet.addEventListener('touchstart', e => {
+      if (sheet.scrollTop > 0) return;
+      startY = e.touches[0].clientY;
+      currentY = startY;
+      isDragging = true;
+      sheet.style.transition = 'none';
+    }, {passive: true});
+
+    sheet.addEventListener('touchmove', e => {
+      if (!isDragging) return;
+      currentY = e.touches[0].clientY;
+      const deltaY = currentY - startY;
+      
+      if (deltaY > 0 && sheet.scrollTop <= 0) {
+        if (e.cancelable) e.preventDefault();
+        sheet.style.transform = `translateY(${deltaY}px)`;
+      }
+    }, {passive: false});
+
+    sheet.addEventListener('touchend', e => {
+      if (!isDragging) return;
+      isDragging = false;
+      sheet.style.transition = '';
+      const deltaY = currentY - startY;
+      
+      if (deltaY > 100) {
+        closeModal(modal.id);
+        setTimeout(() => { sheet.style.transform = ''; }, 320);
+      } else {
+        sheet.style.transform = ''; 
+      }
+    });
+  });
+}
+
+function openSettingsModal() {
+  openModal('settings-modal');
+}
+
+function exportData() {
+  const data = JSON.stringify(localStorage);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'nhat_ky_chi_tieu_backup.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  closeModal('settings-modal');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (confirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc chắn muốn khôi phục?')) {
+        localStorage.clear();
+        for (const key in data) {
+          localStorage.setItem(key, data[key]);
+        }
+        alert('Khôi phục dữ liệu thành công!');
+        location.reload(); 
+      }
+    } catch (error) {
+      alert('Tệp dữ liệu không hợp lệ!');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
