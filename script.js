@@ -118,6 +118,10 @@ function openBudgetForm() {
 
 function saveBudget() {
   const val = parseFloat(document.getElementById('budget-input').value) || 0;
+  if (val < 0 || isNaN(val)) { 
+    alert('Ngân sách không được là số âm!'); 
+    return; 
+  }
   const data = loadMonthData(currentYear, currentMonth);
   data.budget = val;
   saveMonthData(currentYear, currentMonth, data);
@@ -205,7 +209,10 @@ function saveExpense() {
   const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
   const editIdx = parseInt(document.getElementById('exp-edit-index').value);
 
-  if (amount <= 0) { alert('Vui lòng nhập số tiền hợp lệ!'); return; }
+  if (amount <= 0 || isNaN(amount)) { 
+    alert('Vui lòng nhập số tiền hợp lệ lớn hơn 0!'); 
+    return; 
+  }
 
   const catObj = selectedCat !== null ? CATEGORIES[selectedCat] : null;
   const expense = {
@@ -261,7 +268,29 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
   if (typeof lucide !== 'undefined') { lucide.createIcons(); }
   setupBottomSheetSwipe();
+  displayAppVersion();
 });
+
+function displayAppVersion() {
+  const versionEl = document.getElementById('app-version-display');
+  if (!versionEl) return;
+  
+  if ('caches' in window) {
+    caches.keys().then(keys => {
+      const cacheName = keys.find(k => k.startsWith('nhat-ky-chi-tieu-v'));
+      if (cacheName) {
+        const ver = cacheName.substring(cacheName.lastIndexOf('-') + 1);
+        versionEl.textContent = 'Phiên bản ' + ver;
+      } else {
+        versionEl.textContent = 'Phiên bản 1.0 (Trực tiếp)';
+      }
+    }).catch(() => {
+      versionEl.textContent = 'Phiên bản 1.0';
+    });
+  } else {
+    versionEl.textContent = 'Phiên bản 1.0';
+  }
+}
 
 function setupBottomSheetSwipe() {
   const modals = document.querySelectorAll('.modal-overlay');

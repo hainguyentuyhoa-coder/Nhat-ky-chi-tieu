@@ -12,7 +12,12 @@ function loadMonthData(year, month) {
 
 // Lưu dữ liệu tháng vào localStorage
 function saveMonthData(year, month, data) {
-  localStorage.setItem(storageKey(year, month), JSON.stringify(data));
+  try {
+    localStorage.setItem(storageKey(year, month), JSON.stringify(data));
+  } catch (e) {
+    console.error('Storage error:', e);
+    alert('Không thể lưu dữ liệu! Có thể bộ nhớ thiết bị đã đầy.');
+  }
 }
 
 // Định dạng tiền VNĐ chuẩn

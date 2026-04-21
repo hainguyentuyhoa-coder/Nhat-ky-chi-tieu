@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Nhật Ký" />
   <meta name="theme-color" content="#F2E6D6" />
-  
+
   <title>Nhật Ký Chi Tiêu</title>
 
   <link rel="manifest" href="manifest.json">
@@ -18,157 +20,165 @@
 
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="app">
-  <div id="header" style="position: relative; display: flex; justify-content: center; align-items: center;">
-    <h1>NHẬT KÝ CHI TIÊU</h1>
-    <button onclick="openSettingsModal()" style="position: absolute; right: 16px; background: none; border: none; padding: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-      <i data-lucide="settings" style="width:20px;height:20px;color:var(--color-primary);"></i>
+  <div id="app">
+    <div id="header" style="position: relative; display: flex; justify-content: center; align-items: center;">
+      <h1>NHẬT KÝ CHI TIÊU</h1>
+      <button onclick="openSettingsModal()"
+        style="position: absolute; right: 16px; background: none; border: none; padding: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <i data-lucide="settings" style="width:20px;height:20px;color:var(--color-primary);"></i>
+      </button>
+    </div>
+
+    <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+
+    <div style="display:flex;justify-content:center;">
+      <button id="month-selector-btn" onclick="openMonthPicker()">
+        <i data-lucide="calendar" style="width:16px;height:16px;color:var(--color-primary);"></i>
+        <span id="month-display">Tháng 1 / 2025</span>
+        <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--color-muted);"></i>
+      </button>
+    </div>
+
+    <div class="glass-card animate-fadeup" id="hero-section">
+      <div class="label-top">Còn lại</div>
+      <div id="remaining-amount" onclick="openBudgetForm()" title="Nhấn để đặt ngân sách">0 ₫</div>
+      <div class="budget-sub">
+        <div class="item">
+          <div class="val" id="budget-display">0 ₫</div>
+          <div class="lbl">Ngân sách</div>
+        </div>
+        <div class="budget-divider"></div>
+        <div class="item">
+          <div class="val" id="spent-display">0 ₫</div>
+          <div class="lbl">Đã chi</div>
+        </div>
+      </div>
+      <div class="budget-progress-wrap">
+        <div id="budget-progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="glass-card animate-fadeup" id="calendar-section">
+      <div class="monthly-summary">
+        <span class="sum-label">Tổng chi tháng</span>
+        <span class="sum-value" id="monthly-total-display">0 ₫</span>
+      </div>
+      <div class="cal-header">
+        <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
+      </div>
+      <div id="calendar-grid"></div>
+    </div>
+
+    <div id="app-version-display"
+      style="text-align: center; margin-top: 32px; font-size: 11px; color: var(--color-muted); opacity: 0.6;"></div>
+
+    <div class="scroll-spacer"></div>
+  </div>
+
+  <div id="footer-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">
+      <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
+      <span>Trước</span>
+    </button>
+    <span class="month-label" id="footer-month-label"></span>
+    <button class="nav-btn" onclick="changeMonth(1)">
+      <span>Sau</span>
+      <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
     </button>
   </div>
-  
-  <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
 
-  <div style="display:flex;justify-content:center;">
-    <button id="month-selector-btn" onclick="openMonthPicker()">
-      <i data-lucide="calendar" style="width:16px;height:16px;color:var(--color-primary);"></i>
-      <span id="month-display">Tháng 1 / 2025</span>
-      <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--color-muted);"></i>
-    </button>
-  </div>
-
-  <div class="glass-card animate-fadeup" id="hero-section">
-    <div class="label-top">Còn lại</div>
-    <div id="remaining-amount" onclick="openBudgetForm()" title="Nhấn để đặt ngân sách">0 ₫</div>
-    <div class="budget-sub">
-      <div class="item">
-        <div class="val" id="budget-display">0 ₫</div>
-        <div class="lbl">Ngân sách</div>
+  <div class="modal-overlay" id="month-picker-modal" onclick="closeModalOnBg(event,'month-picker-modal')">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Chọn Tháng</div>
+      <div class="year-nav">
+        <button class="year-nav-btn" onclick="changePickerYear(-1)">
+          <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
+        </button>
+        <span class="year-txt" id="picker-year-label">2025</span>
+        <button class="year-nav-btn" onclick="changePickerYear(1)">
+          <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+        </button>
       </div>
-      <div class="budget-divider"></div>
-      <div class="item">
-        <div class="val" id="spent-display">0 ₫</div>
-        <div class="lbl">Đã chi</div>
+      <div class="month-grid" id="month-picker-grid"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="settings-modal" onclick="closeModalOnBg(event,'settings-modal')">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Cài Đặt Dữ Liệu</div>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+        <button class="btn-primary" style="background: linear-gradient(135deg, #6B8E6B, #4A6B4A);"
+          onclick="exportData()">
+          <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="download" style="width:18px;height:18px;"></i> Xuất Dữ Liệu
+          </span>
+        </button>
+        <button class="btn-primary" style="background: linear-gradient(135deg, #C0634A, #A04B35);"
+          onclick="document.getElementById('import-file').click(); closeModal('settings-modal');">
+          <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="upload" style="width:18px;height:18px;"></i> Nhập Dữ Liệu
+          </span>
+        </button>
       </div>
-    </div>
-    <div class="budget-progress-wrap">
-      <div id="budget-progress-bar" style="width:0%"></div>
+      <button class="btn-secondary" onclick="closeModal('settings-modal')">Đóng</button>
     </div>
   </div>
 
-  <div class="glass-card animate-fadeup" id="calendar-section">
-    <div class="monthly-summary">
-      <span class="sum-label">Tổng chi tháng</span>
-      <span class="sum-value" id="monthly-total-display">0 ₫</span>
-    </div>
-    <div class="cal-header">
-      <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
-    </div>
-    <div id="calendar-grid"></div>
-  </div>
-
-  <div class="scroll-spacer"></div>
-</div>
-
-<div id="footer-nav">
-  <button class="nav-btn" onclick="changeMonth(-1)">
-    <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
-    <span>Trước</span>
-  </button>
-  <span class="month-label" id="footer-month-label"></span>
-  <button class="nav-btn" onclick="changeMonth(1)">
-    <span>Sau</span>
-    <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
-  </button>
-</div>
-
-<div class="modal-overlay" id="month-picker-modal" onclick="closeModalOnBg(event,'month-picker-modal')">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Chọn Tháng</div>
-    <div class="year-nav">
-      <button class="year-nav-btn" onclick="changePickerYear(-1)">
-        <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
-      </button>
-      <span class="year-txt" id="picker-year-label">2025</span>
-      <button class="year-nav-btn" onclick="changePickerYear(1)">
-        <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
-      </button>
-    </div>
-    <div class="month-grid" id="month-picker-grid"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="settings-modal" onclick="closeModalOnBg(event,'settings-modal')">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Cài Đặt Dữ Liệu</div>
-    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
-      <button class="btn-primary" style="background: linear-gradient(135deg, #6B8E6B, #4A6B4A);" onclick="exportData()">
-        <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
-          <i data-lucide="download" style="width:18px;height:18px;"></i> Xuất Dữ Liệu
-        </span>
-      </button>
-      <button class="btn-primary" style="background: linear-gradient(135deg, #C0634A, #A04B35);" onclick="document.getElementById('import-file').click(); closeModal('settings-modal');">
-        <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
-          <i data-lucide="upload" style="width:18px;height:18px;"></i> Nhập Dữ Liệu
-        </span>
-      </button>
-    </div>
-    <button class="btn-secondary" onclick="closeModal('settings-modal')">Đóng</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="budget-modal" onclick="closeModalOnBg(event,'budget-modal')">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Ngân Sách Tháng</div>
-    <div style="margin-bottom:16px;">
-      <label class="form-label">Số tiền ngân sách (₫)</label>
-      <input type="number" id="budget-input" class="form-input" placeholder="VD: 5000000" inputmode="numeric" />
-    </div>
-    <button class="btn-primary" onclick="saveBudget()">Lưu Ngân Sách</button>
-    <button class="btn-secondary" onclick="closeModal('budget-modal')">Huỷ</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="day-modal" onclick="closeModalOnBg(event,'day-modal')">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="day-modal-title">Chi Tiêu Ngày</div>
-    <div id="day-expense-list"></div>
-    <div id="expense-form" style="margin-top:8px;">
-      <div style="margin-bottom:12px;">
-        <label class="form-label">Danh mục gợi ý</label>
-        <div class="category-grid" id="category-grid"></div>
-      </div>
-      <div style="margin-bottom:12px;">
-        <label class="form-label">Ghi chú (tuỳ chọn)</label>
-        <input type="text" id="exp-note" class="form-input" placeholder="VD: Cà phê sáng" />
-      </div>
+  <div class="modal-overlay" id="budget-modal" onclick="closeModalOnBg(event,'budget-modal')">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Ngân Sách Tháng</div>
       <div style="margin-bottom:16px;">
-        <label class="form-label">Số tiền (₫)</label>
-        <input type="number" id="exp-amount" class="form-input" placeholder="VD: 50000" inputmode="numeric" />
+        <label class="form-label">Số tiền ngân sách (₫)</label>
+        <input type="number" id="budget-input" class="form-input" placeholder="VD: 5000000" inputmode="numeric" />
       </div>
-      <input type="hidden" id="exp-edit-index" value="-1" />
-      <button class="btn-primary" onclick="saveExpense()">
-        <span id="exp-save-label">Thêm Chi Tiêu</span>
-      </button>
-      <button class="btn-secondary" onclick="cancelExpenseEdit()">Huỷ</button>
+      <button class="btn-primary" onclick="saveBudget()">Lưu Ngân Sách</button>
+      <button class="btn-secondary" onclick="closeModal('budget-modal')">Huỷ</button>
     </div>
   </div>
-</div>
 
-<script src="store.js"></script>
-<script src="script.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW đăng ký thất bại:', err));
-    });
-  }
-</script>
+  <div class="modal-overlay" id="day-modal" onclick="closeModalOnBg(event,'day-modal')">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title" id="day-modal-title">Chi Tiêu Ngày</div>
+      <div id="day-expense-list"></div>
+      <div id="expense-form" style="margin-top:8px;">
+        <div style="margin-bottom:12px;">
+          <label class="form-label">Danh mục gợi ý</label>
+          <div class="category-grid" id="category-grid"></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label class="form-label">Ghi chú (tuỳ chọn)</label>
+          <input type="text" id="exp-note" class="form-input" placeholder="VD: Cà phê sáng" />
+        </div>
+        <div style="margin-bottom:16px;">
+          <label class="form-label">Số tiền (₫)</label>
+          <input type="number" id="exp-amount" class="form-input" placeholder="VD: 50000" inputmode="numeric" />
+        </div>
+        <input type="hidden" id="exp-edit-index" value="-1" />
+        <button class="btn-primary" onclick="saveExpense()">
+          <span id="exp-save-label">Thêm Chi Tiêu</span>
+        </button>
+        <button class="btn-secondary" onclick="cancelExpenseEdit()">Huỷ</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="store.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW đăng ký thất bại:', err));
+      });
+    }
+  </script>
 
 </body>
+
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nhat-ky-chi-tieu-v1.0.1';
+const CACHE_NAME = 'nhat-ky-chi-tieu-v1.0.5';
 const urlsToCache = [
   './',
   './index.html',
@@ -34,17 +34,29 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request).then(fetchResponse => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, fetchResponse.clone());
+        if (response) return response;
+
+        return fetch(event.request).then(fetchResponse => {
+          if (!fetchResponse || (fetchResponse.status !== 200 && fetchResponse.status !== 0)) {
             return fetchResponse;
+          }
+
+          let responseToCache = fetchResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
           });
+
+          return fetchResponse;
         });
       }).catch(() => {
-        // Fallback or do nothing
+        // Ignore fetch errors (e.g. offline and no cache match)
       })
   );
 });
