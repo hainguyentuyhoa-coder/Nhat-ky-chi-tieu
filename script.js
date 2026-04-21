@@ -198,7 +198,7 @@ function renderDayExpenseList() {
     `;
     listEl.appendChild(item);
   });
-  lucide.createIcons();
+  if (typeof lucide !== 'undefined') { lucide.createIcons(); }
 }
 
 function saveExpense() {
@@ -259,8 +259,8 @@ function deleteExpense(idx) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  lucide.createIcons();
   renderAll();
+  if (typeof lucide !== 'undefined') { lucide.createIcons(); }
   setupBottomSheetSwipe();
 });
 
